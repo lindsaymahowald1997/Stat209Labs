@@ -1,0 +1,105 @@
+---
+title: "Lab 9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(babynames)
+data(babynames)    ## SSA data
+data(births)       ## Census data
+```
+
+```{r}
+babynames %>%
+  filter(name == "Colin") %>%
+  group_by(year) %>%
+  summarize(overall_percentage = 100 * sum(0.5 * prop)) %>%
+  arrange(desc(overall_percentage)) %>%
+  head(1) %>%
+  select(year, overall_percentage)
+```
+
+```{r}
+most_popular_year <- function(name_of_interest) 
+{
+  babynames %>%
+    filter(name == name_of_interest) %>%
+    group_by(year) %>%
+    summarize(
+      name               = name[1], 
+      overall_percentage = 100 * sum(0.5 * prop)
+      ) %>%
+    arrange(desc(overall_percentage)) %>%
+    head(1) %>%
+    select(name, year, overall_percentage)
+}
+most_popular_year("Colin")
+```
+
+```{r}
+formals(most_popular_year)
+```
+
+```{r}
+most_popular_years <- function(name_arg, num_years) 
+{
+  babynames %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(
+      name               = name[1], 
+      overall_percentage = 100 * sum(0.5 * prop)
+      ) %>%
+    arrange(desc(overall_percentage)) %>%
+    head(n = num_years) %>%
+    select(name, year, overall_percentage)
+}
+```
+
+```{r}
+most_popular_years("Colin", 4)
+```
+
+```{r}
+most_popular_years <- function(name_arg, num_years = 1) 
+{
+  babynames %>%
+    filter(name == name_arg) %>%
+    group_by(year) %>%
+    summarize(
+      name               = name[1], 
+      overall_percentage = 100 * sum(0.5 * prop)
+      ) %>%
+    arrange(desc(overall_percentage)) %>%
+    head(n = num_years) %>%
+    select(name, year, overall_percentage)
+}
+
+most_popular_year2 <- function(dataset, name_of_interest, num_years = 1) 
+{
+  dataset %>%
+    filter(name == name_of_interest) %>%
+    group_by(year) %>%
+    summarize(
+      name = name[1],
+      overall_percentage = 100 * sum(0.5 * prop)
+      ) %>%
+    arrange(desc(overall_percentage)) %>%
+    head(n = num_years) %>%
+    select(name, year, overall_percentage)
+}
+```
+
+```{r}
+#View(nycflights13::flights)
+exercise1 <- function(airline_of_interest)
+{
+  flights %>% filter(carrier == airline_of_interest) %>% summarize(num_rows == n())
+}
+exercise1("DL")
+```

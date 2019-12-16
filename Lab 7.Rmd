@@ -1,0 +1,74 @@
+---
+title: "Lab 7"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(babynames)
+data(babynames)    ## SSA data
+data(births)       ## Census data
+head(births)
+census_births <- births
+```
+
+```{r}
+ssa_births <- babynames %>%
+  rename(num_births = n) %>%   # just to disambiguate the ns below
+  group_by(year) %>%
+  summarize(
+    distinct_name_sex_combos = n(), # this is just the number of entries that year
+    births = sum(num_births)) %>%
+  filter(year <= 2012)         # Removing data after 2012
+head(ssa_births)
+head(census_births)
+```
+
+```{r}
+joined_via_inner <- 
+  ssa_births %>% 
+  inner_join(census_births, by = "year")  # quotes are required in the variable name
+head(joined_via_inner)
+joined_via_inner %>% pull(year)
+```
+
+```{r}
+joined_via_left <-
+  ssa_births %>%
+  left_join(census_births, by = "year")
+joined_via_left %>% filter(year < 1919)
+
+joined_via_left %>%
+  filter(is.na(births.y))
+```
+
+```{r}
+joined_via_full <- 
+  ssa_births %>%
+  full_join(census_births, by = "year")
+joined_via_full %>% pull(year)
+```
+
+```{r}
+joined_via_full %>%
+  ggplot(aes(x = births.x, y = births.y)) +
+  geom_point()
+```
+
+```{r}
+library(nycflights13)
+View(flights)
+View(airlines)
+library(nycflights13)
+flights %>%
+  group_by(carrier) %>%
+  summarize(avg_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  left_join(airlines, by = "carrier")
+flights %>%
+  group_by(carrier) %>%
+  summarize(avg_delay = mean(arr_delay, na.rm = TRUE))
+```

@@ -1,0 +1,237 @@
+---
+title: "Lab4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(babynames)
+data(lifetables)
+```
+
+```{r}
+library(mdsr)
+BabynamesDist <- make_babynames_dist()
+glimpse(BabynamesDist)
+```
+
+```{r}
+Josephs <- filter(BabynamesDist, name == "Joseph" & sex == "M")
+glimpse(Josephs)
+```
+
+```{r}
+joseph_plot <- ggplot(Josephs, aes(x = year))
+joseph_plot
+```
+
+```{r}
+joseph_plot +
+  geom_bar(
+    stat = "identity",
+    aes(y = est_alive_today / 1000))
+```
+
+```{r}
+joseph_plot <- joseph_plot +
+  geom_bar(
+    stat = "identity",
+    aes(y = est_alive_today / 1000),
+    fill = "#b2d7e9",  # fill controls the interior of the bars
+    color = "white"    # color controls the outline of the bars
+    )
+```
+
+```{r}
+joseph_plot <- 
+  joseph_plot +
+  geom_line(aes(y = count_thousands))
+joseph_plot
+```
+
+```{r}
+## We do not want to load the Hmisc package in its entirety, 
+## because some of its functions have the same names as 
+## functions in the tidyverse, and we don't want to 'mask' the 
+## latter. Instead we can call the function directly from 
+## Hmisc without loading the package using the following syntax.
+median.birthyear <- 
+  with(
+     data = Josephs, 
+     expr = Hmisc::wtd.quantile(
+         x = year, 
+         weights = est_alive_today, # cases in each year
+         prob = 0.5                 # the median is halfway through the cases
+         ))
+median.birthyear
+```
+
+```{r}
+joseph_plot <- 
+  joseph_plot +
+      geom_bar(
+        stat = "identity",
+        aes(
+          y = ifelse(
+                  test = year == median.birthyear, # the condition (note == instead of =)
+                  yes  = est_alive_today / 1000,   # value if true
+                  no   = 0                         # value if false
+                  )),
+        fill = "#008fd5", # the darker blue color
+        color = "white") 
+joseph_plot
+```
+
+```{r}
+library(ggthemes)
+joseph_plot <- joseph_plot + theme_fivethirtyeight()
+joseph_plot
+```
+
+```{r}
+joseph_plot +
+  ggtitle("Age Distribution of American Boys Named Joseph") +     
+  geom_text(
+    x = 1935, y = 40, 
+    label = "Number of Josephs\nborn each year"
+    ) +
+  geom_text(
+    x = 1915, y = 13, 
+    label = "Number of Josephs\nborn each year\nestimated to be alive\non 1/1/2014", 
+    colour = "#b2d7e9"
+    ) +
+  geom_text(
+    x = 2003, y = 40, 
+    label = "The median\nliving Joseph\n in 2014 was 37 years old",
+    colour = "darkgray"
+    ) + 
+  geom_curve(
+    x = 1995, xend = 1974, y = 40, yend = 24,
+    arrow = arrow(length = unit(0.3, "cm")), 
+    curvature = 0.5
+    ) +   
+  ylim(0, 42)  ## change the range on the y axis to make room for annotation
+```
+
+```{r}
+plot_template <- joseph_plot
+Colins <- filter(BabynamesDist, name == "Colin" & sex == "M")
+colin_plot <- plot_template %+% Colins
+colin_plot
+```
+
+```{r}
+median.birthyear <- 
+  with(
+     Colins, 
+     Hmisc::wtd.quantile(
+         x = year, 
+         weights = est_alive_today,
+         prob = 0.5)
+  )
+## Note that we need to use the same name for median.birthyear that we used before.
+## Once we redefine this variable, since the test in our ifelse() clause referred
+## to this variable by name within the definition of the plot itself, the plot
+## is automatically updated when we change the value of this variable.
+median.birthyear
+```
+
+```{r}
+colin_plot +
+  ggtitle("Age Distribution of American Boys Named Colin") +     
+  geom_text(
+    x = 1915, y = 5, 
+    label = "Number of Colins\nborn each year" # Use \n for a line break
+    ) +
+  geom_text(
+    x = 1915, y = 8, 
+    label = "Number of Colins\nborn each year\nestimated to be alive\non 1/1/2014", 
+    colour = "#b2d7e9"
+    ) +
+  geom_text(
+    x = 1968, y = 5, 
+    label = "The median\nliving Colin\n in 2014 was 17 years old",
+    colour = "darkgray"
+    ) + 
+  geom_curve(
+    x = 1977, xend = 1997, y = 5, yend = 3,
+    arrow = arrow(length = unit(0.3, "cm")), 
+    curvature = -0.5
+    ) +   
+  ylim(0, 10)  # change the range on the y axis to make room for annotation
+```
+
+###My own name
+```{r}
+plot_template <- joseph_plot
+Gladys <- filter(BabynamesDist, name == "Gladys" & sex == "F")
+gladys_plot <- plot_template %+% Gladys
+gladys_plot
+```
+
+```{r}
+median.birthyear <- 
+  with(
+     Gladys, 
+     Hmisc::wtd.quantile(
+         x = year, 
+         weights = est_alive_today,
+         prob = 0.5)
+  )
+## Note that we need to use the same name for median.birthyear that we used before.
+## Once we redefine this variable, since the test in our ifelse() clause referred
+## to this variable by name within the definition of the plot itself, the plot
+## is automatically updated when we change the value of this variable.
+median.birthyear
+```
+
+```{r}
+gladys_plot +
+  ggtitle("Age Distribution of American Girls Named Gladys") +     
+  geom_text(
+    x = 1915, y = 5, 
+    label = "Number of Gladys\nborn each year" # Use \n for a line break
+    ) +
+  geom_text(
+    x = 2000, y = 2.5, 
+    label = "Number of Gladys\nborn each year\nestimated to be alive\non 1/1/2014", 
+    colour = "#b2d7e9"
+    ) +
+  geom_text(
+    x = 1950, y = 6.5, 
+    label = "The median\nliving Gladys\n in 2014 was 75 years old",
+    colour = "darkgray"
+    ) + 
+  geom_curve(
+    x = 1941, xend = 1941, y = 5, yend = 3,
+    arrow = arrow(length = unit(0.3, "cm")), 
+    curvature = -0.5
+    ) +   
+  ylim(0, 10) + theme(plot.title = element_text(size = 15, face = "bold")) # change the range on the y axis to make room for annotation
+```
+
+```{r}
+## The facet_grid format is: row_variable ~ column_variable
+many_names_plot <- joseph_plot + facet_grid(name ~ sex) 
+many_names_plot %+%
+  filter(BabynamesDist, name %in% c("Jessie", "Marion", "Jackie"))
+many_names_plot
+```
+
+```{r}
+many_names_plot1 <- plot_template + facet_grid(sex ~ name)
+many_names_plot1 %+%
+  filter(BabynamesDist, name %in% c("Jessie", "Marion", "Jackie"))
+many_names_plot1
+```
+
+```{r}
+exercise_4 <- plot_template + facet_grid(sex ~ name)
+exercise_4 %+%
+  filter(BabynamesDist, name %in% c("Lindsay", "Lindsey"))
+exercise_4
+
+```

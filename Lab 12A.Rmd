@@ -1,0 +1,25 @@
+---
+title: "Lab 12A"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dbplyr)  ## Note the 'b'; this is not dplyr
+library(mdsr)    ## Package for our book
+library(RMySQL)  ## Standard R/SQL interface package
+db <- dbConnect_scidb("airlines")
+```
+
+```{r}
+dbListTables(db)
+flights <- tbl(db, "flights")
+```
+
+```{r}
+
+
+```

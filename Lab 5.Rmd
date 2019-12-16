@@ -1,0 +1,77 @@
+---
+title: "Lab 5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(babynames)
+# This is a slightly different dataset than on the last lab
+data(babynames) 
+View(babynames)
+```
+
+```{r}
+babynames %>% filter(name == "Bella" & sex == "F") %>% head()
+babynames %>% select(year, name, n) %>% head()
+```
+
+```{r}
+Bellas <- babynames %>% filter(name == "Bella" & sex == "F") %>% select(year, n)
+head(Bellas)
+```
+
+```{r}
+modified_babynames <- babynames %>%
+  mutate(popular = prop >= 0.01)
+head(modified_babynames)
+```
+
+```{r}
+modified_babynames <- modified_babynames %>% rename(is_popular = popular)
+head(modified_babynames)
+```
+
+```{r}
+PopularBabynames <- modified_babynames %>%
+  filter(is_popular == TRUE) %>%
+  select(-is_popular)
+head(PopularBabynames)
+```
+
+```{r}
+babynames %>%
+  arrange(desc(prop)) %>%
+  head()
+
+babynames %>% filter(name == "Lindsay" & sex == "F") %>% arrange(desc(prop)) %>% select(year) %>% head()
+babynames %>% 
+```
+
+```{r}
+modified_babynames <- modified_babynames %>%
+  rename(num_births = n)
+head(modified_babynames)
+
+Bellas <- modified_babynames %>%
+  filter(name == "Bella" & sex == "F")
+Bellas %>%
+  summarize(
+    num_rows = n(), 
+    most_bellas = max(num_births))
+Bellas %>%
+  summarize(
+    num_rows    = n(), 
+    peak_number = max(num_births),
+    peak_year   = year[which.max(num_births)])
+```
+
+```{r}
+Lindsay <- modified_babynames %>% filter(name == "Lindsay" & sex == "F")
+Lindsay %>% arrange(desc(prop)) %>% select(year) %>% head(n=1)
+Lindsay %>% summarize(num_rows = n(), most_lindsays = max(num_births), peak_year  = year[which.max(num_births)]) %>% select(peak_year)
+```

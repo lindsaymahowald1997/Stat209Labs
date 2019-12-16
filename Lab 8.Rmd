@@ -1,0 +1,95 @@
+---
+title: "Lab 8"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(babynames)
+data(babynames)    ## SSA data
+data(births)       ## Census data
+```
+
+```{r}
+census_births <- births
+ssa_births <- babynames %>%
+  rename(num_births = n) %>%
+  group_by(year) %>%
+  summarize(num_rows = n(), births = sum(num_births))
+total_births <-
+  ssa_births %>%
+  full_join(census_births, by = "year")
+total_births <- total_births %>%
+  select(-num_rows) %>%
+  rename(ssa = births.x, census = births.y)
+total_births
+```
+
+```{r}
+total_births %>%
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = census), color = "blue") +
+  geom_line(aes(y = ssa), color = "orange") +
+  xlab("Year") + ylab("Total Births")
+
+ggplot() + geom_line(data = census_births, aes(x=year, y = births, color = "Census Births")) + geom_line(data = ssa_births, aes(x=year, y = births, color = "SSA Births"))
+```
+
+```{r}
+births_long <- total_births %>%
+  gather(
+    key = "source",   # this is what we're going to call the new variable
+    value = "births", # this is where the values will go in "long" format
+    census, ssa       # these are the columns we're "merging"
+                      # (we could have also said -year, to merge all
+                      # columns *except* year
+    )
+births_long
+births_long %>%
+  ggplot(aes(x = year, y = births, color = source)) +
+  geom_line()
+```
+
+```{r}
+## Use distinct() to find and remove duplicate entries
+births_long <- births_long %>%
+  distinct()
+## The problematic rows were the last few years
+## from the census; let's look at those
+births_long %>% 
+  filter(source == "census") %>%
+  tail()
+births_wide <- births_long %>%
+  spread(key = source, value = births)
+births_wide
+## The cor() function in mosaic is nicer than the standard one
+## since it has a data= argument.  The use= argument tells
+## cor() how to handle missing data.
+mosaic::cor(census ~ ssa, data = births_wide, use = "pairwise.complete")
+births_wide %>%
+  mutate(discrepancy = census - ssa) %>%
+  ggplot(aes(x = year, y = discrepancy)) +
+    geom_line() + ylab("Census Estimate - SSA Estimate")
+```
+
+```{r}
+genderedu <- read_csv("project1/ratio_of_girls_to_boys_in_primary_and_secondary_education_perc.csv")
+View(genderedu)
+dim(genderedu)
+```
+
+```{r}
+newgender <- genderedu %>% gather(key = "year", value = "eduratio", -country)
+dim(newgender)
+newgender1 <- newgender %>% mutate(year = parse_number(year))
+newgender2 <- newgender1 %>% filter(country == "Germany" | country == "Afghanistan" | country == "Estonia" | country == "Netherlands" | country == "United States" | country == "Tanzania" | country == "Sierra Leone" | country == "Rwanda" | country == "Chad") 
+newgender2
+```
+
+```{r}
+ggplot(data = newgender2, aes(x=year, y=eduratio, color = country)) + geom_line()
+```

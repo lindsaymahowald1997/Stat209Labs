@@ -1,0 +1,129 @@
+---
+title: "Lab 6"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(babynames)
+library(RColorBrewer)
+palette(brewer.pal(n = 3, name = "Set2"))
+```
+
+```{r}
+babynames %>% 
+  filter(name == "Jessie") %>%
+  ggplot(aes(x = year, y = n, color = sex)) +
+  geom_line()
+```
+
+```{r}
+babynames %>%
+  filter(name == "Jessie" & year == 1982) %>%
+  summarize(
+    total = sum(n),
+    num_males = sum(ifelse(sex == "M", n, 0)))
+
+babynames %>%
+  filter(name == "Jessie" & year == 1982 & sex == "M") %>%
+  summarize(
+    total = sum(n))
+
+babynames %>%
+  filter(name == "Jessie" & year == 1982) %>%
+  summarize(
+    total = sum(n),
+    num_males = sum(ifelse(sex == "M", n, 0))) %>%   mutate(prop_males = num_males / total)
+```
+
+```{r}
+jessies_by_year <-
+  babynames %>%
+    filter(name == "Jessie") %>%
+    group_by(year) %>%
+    summarize(
+      num_rows = n(),        # just a sanity check
+      total_births = sum(n), # total "Jessies" that year
+      num_males = sum(ifelse(sex == "M", n, 0)), # conditional counting
+      num_females = sum(ifelse(sex == "F", n, 0))) %>%
+    mutate(prop_males = num_males / total_births)
+jessies_by_year
+
+jessies_by_year %>%
+  ggplot(aes(x = year, y = prop_males)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept = 0.5, lty = 5, color = "red") +
+  scale_y_continuous(name = "Proportion Male") +
+  scale_x_continuous(name = "Year", breaks = seq(1880, 2020, by = 10)) +
+  ggtitle("Gender Breakdown of the name 'Jessie' in the U.S. over Time")
+```
+
+```{r}
+babynames %>%
+  filter(name == "Jessie") %>%
+  group_by(year) %>%
+  summarize(total_births = sum(n)) %>%
+  arrange(desc(total_births)) %>%
+  head(n = 1)
+
+babynames %>%
+  filter(name == "Jessie") %>%
+  group_by(year) %>%
+  summarize(total_births = sum(n)) %>%
+  summarize(
+    peak_number = max(total_births),
+    peak_year = year[which.max(total_births)])
+```
+
+```{r}
+babynames %>%
+  group_by(name) %>%
+  summarize(
+    first_year = min(year),
+    last_year = max(year))
+```
+
+```{r}
+midwest_fun
+
+midwest_fun %>% ggplot(aes(x = pctblack, y = poverty)) + geom_line(color = "blue") +
+  geom_vline(xintercept = 0.108, lty = 5, color = "red") +
+  scale_y_continuous(name = "Proportion in Poverty") +
+  scale_x_continuous(name = "Proportion African American") +
+  ggtitle("Proportion of AA Population and Poverty in IL Counties")
+
+midwestfunction <- function(state_of_interest)
+{
+  midwest %>% filter(state == state_of_interest) %>% group_by(county) %>% summarize(totalblack = sum(popblack), totalpop = sum(poptotal), poverty = sum(percbelowpoverty)) %>% mutate(pctblack = totalblack/totalpop) %>% ggplot(aes(x = pctblack, y = poverty)) + geom_line(color = "blue") +
+  scale_y_continuous(name = "Proportion in Poverty") +
+  scale_x_continuous(name = "Proportion African American") +
+  ggtitle("Proportion of AA Population and Poverty in Each State's Counties")
+}
+midwest_list <- c("IL", "IN", "MI", "OH", "WI")
+lapply(midwest_list, FUN = midwestfunction)
+```
+
+```{r}
+jessies_by_year %>%
+  ggplot(aes(x = year, y = prop_males)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept = 0.5, lty = 5, color = "red") +
+  scale_y_continuous(name = "Proportion Male") +
+  scale_x_continuous(name = "Year", breaks = seq(1880, 2020, by = 10)) +
+  ggtitle("Gender Breakdown of the name 'Jessie' in the U.S. over Time")
+
+jessies_by_year1 <-
+  babynames %>%
+    filter(name == "Jessie")
+jessies_by_year1
+
+jessies_by_year2 <-
+  babynames %>%
+    filter(name == "Jessie") %>% group_by(year)
+jessies_by_year2
+```
+
