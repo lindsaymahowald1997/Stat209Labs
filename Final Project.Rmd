@@ -1,0 +1,41 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dbplyr)
+library(mdsr)
+library(RMySQL)
+db <- dbConnect_scidb("nyctaxi")
+```
+
+```{r}
+dbListTables(db)
+taxis <- tbl(db, "yellow_old")
+```
+
+```{sql connection=db}
+DESCRIBE yellow_old
+```
+
+```{sql connection=db}
+SELECT pickup_longitude, pickup_latitude, passenger_count, trip_distance, dropoff_longitude, dropoff_longitude, dropoff_latitude, payment_type, fare_amount, tip_amount, total_amount FROM yellow_old LIMIT 200
+```
+
+```{r}
+query <- "SELECT pickup_longitude, pickup_latitude, passenger_count, trip_distance, dropoff_longitude, dropoff_longitude, dropoff_latitude, payment_type, fare_amount, tip_amount, total_amount FROM yellow_old LIMIT 200"
+```
+
+```{r}
+nyctaxidata <- db %>% dbGetQuery(query) %>% collect()
+```
+
+```{r}
+View(nyctaxidata)
+```
+
